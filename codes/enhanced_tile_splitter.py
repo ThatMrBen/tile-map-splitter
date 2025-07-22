@@ -41,6 +41,9 @@ class EnhancedTileMapSplitter:
         self.crop_top = 0
         self.crop_right = 0
         self.crop_bottom = 0
+        self.use_prefix_suffix = False
+        self.filename_prefix = ""
+        self.filename_suffix = ""
     
     def get_input_output_paths(self, tutorial_mode=False, test_image_path=None):
         """获取输入输出路径"""
@@ -351,6 +354,34 @@ class EnhancedTileMapSplitter:
         
         print(f"✅ 起始Y值: {self.start_y}")
 
+        # 询问是否需要添加前缀/后缀
+        print()
+        prefix_suffix_choice = input("是否需要为文件名添加前缀或后缀？(y/n): ").strip().lower()
+
+        if prefix_suffix_choice == 'y':
+            self.use_prefix_suffix = True
+            print()
+            print("请输入前缀和后缀（留空表示不添加）:")
+
+            prefix_input = input("文件名前缀（如：tile_）: ").strip()
+            self.filename_prefix = prefix_input if prefix_input else ""
+
+            suffix_input = input("文件名后缀（如：_map）: ").strip()
+            self.filename_suffix = suffix_input if suffix_input else ""
+
+            # 显示示例文件名
+            example_x, example_y = 1, self.start_y
+            example_filename = f"{self.filename_prefix}{example_x}_{example_y}{self.filename_suffix}.png"
+            print(f"✅ 示例文件名: {example_filename}")
+
+            if self.filename_prefix:
+                print(f"   前缀: '{self.filename_prefix}'")
+            if self.filename_suffix:
+                print(f"   后缀: '{self.filename_suffix}'")
+        else:
+            self.use_prefix_suffix = False
+            print("跳过前缀/后缀设置")
+
     def perform_splitting(self):
         """执行切割操作"""
         clear_screen()
@@ -399,7 +430,13 @@ class EnhancedTileMapSplitter:
                 # 计算文件名
                 x = col + 1
                 y = self.start_y + row
-                filename = f"{x}_{y}.png"
+
+                # 应用前缀/后缀
+                if self.use_prefix_suffix:
+                    filename = f"{self.filename_prefix}{x}_{y}{self.filename_suffix}.png"
+                else:
+                    filename = f"{x}_{y}.png"
+
                 filepath = os.path.join(output_folder, filename)
                 
                 # 保存瓦片
